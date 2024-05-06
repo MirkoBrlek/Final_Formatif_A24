@@ -38,7 +38,7 @@
       </div>
       <div style="margin-top: 15px">
         <div *ngFor="let answer of currentQuestion.answers; index as i">
-          <button [style]="selecion == i?'background-color:dodgerblue;':''" [disabled]="selecion >= 0" mat-raised-button color="primary" color="accent" style="margin: 10px" matBadge={{currentQuestion.playerChoices[i]}} (click)="SelectChoice(i)">{{answer}}</button>
+          <button [style]="selection == i?'background-color:dodgerblue;':''" [disabled]="selection >= 0" mat-raised-button color="primary" color="accent" style="margin: 10px" matBadge={{currentQuestion.playerChoices[i]}} (click)="SelectChoice(i)">{{answer}}</button>
         </div>
       </div>
       

@@ -111,6 +111,19 @@ export class AppComponent {
       });
     });
 
+    this.hubConnection.on('RightAnswer', () => {
+      this.zone.run(() => {
+        this.nbRightAnswers++;
+        alert("Good Answer!");
+      });
+    });
+
+    this.hubConnection.on('WrongAnswer', (rightAnswer:number) => {
+      this.zone.run(() => {
+        alert("Wrong Answer! The right answer was: " + rightAnswer);
+      });
+    });
+
     this.hubConnection
       .start()
       .then(() => {
