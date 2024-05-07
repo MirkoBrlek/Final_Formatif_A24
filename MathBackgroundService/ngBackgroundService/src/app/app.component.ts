@@ -114,13 +114,13 @@ export class AppComponent {
     this.hubConnection.on('RightAnswer', () => {
       this.zone.run(() => {
         this.nbRightAnswers++;
-        alert("Good Answer!");
+        alert("Bonne réponse !");
       });
     });
 
     this.hubConnection.on('WrongAnswer', (rightAnswer:number) => {
       this.zone.run(() => {
-        alert("Wrong Answer! The right answer was: " + rightAnswer);
+        alert("Mauvaise réponse ! La bonne réponse était " + rightAnswer);
       });
     });
 
