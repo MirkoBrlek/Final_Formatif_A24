@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
-const CONNECTION_LOCALSTORAGE_KEY = "connected";
+const CONNECTION_LOCALSTORAGE_KEY = "username";
 
 @Injectable({
   providedIn: 'root'
@@ -33,17 +33,18 @@ export class AccountService {
       username : this.username,
       password : this.motDePasse
     }
-    await lastValueFrom(this.http.post<any>(this.accountBaseUrl + 'Login', registerData));
-    localStorage.setItem(CONNECTION_LOCALSTORAGE_KEY, registerData.username);
+    let result = await lastValueFrom(this.http.post<any>(this.accountBaseUrl + 'Login', registerData));
+    sessionStorage.setItem(CONNECTION_LOCALSTORAGE_KEY, registerData.username);
+    sessionStorage.setItem("token", result.token);
   }
 
   async logout(){
-    await lastValueFrom(this.http.get<any>(this.accountBaseUrl + 'Logout'));
-    localStorage.removeItem(CONNECTION_LOCALSTORAGE_KEY);
+    sessionStorage.removeItem(CONNECTION_LOCALSTORAGE_KEY);
+    sessionStorage.removeItem("token");
   }
 
   isLoggedIn() : Boolean{
-    return localStorage.getItem(CONNECTION_LOCALSTORAGE_KEY) != null;
+    return sessionStorage.getItem("token") != null;
   }
 
 }

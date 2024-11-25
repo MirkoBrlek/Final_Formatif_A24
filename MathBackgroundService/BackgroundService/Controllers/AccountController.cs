@@ -3,6 +3,10 @@ using BackgroundServiceVote.DTOs;
 using BackgroundServiceVote.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace BackgroundServiceVote.Controllers
 {
@@ -60,16 +64,32 @@ namespace BackgroundServiceVote.Controllers
             var result = await SignInManager.PasswordSignInAsync(login.Username, login.Password, true, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                return Ok();
+                Claim? nameIdentifierClaim = User.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+
+                // Note: On ajoute simplement le NameIdentifier dans les claims. Il n'y aura pas de rôle pour les utilisateurs du WebAPI.
+                List<Claim> authClaims = new List<Claim>();
+                authClaims.Add(nameIdentifierClaim);
+
+                SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("C'est tellement la meilleure cle qui a jamais ete cree dans l'histoire de l'humanite (doit etre longue)"));
+
+                string issuer = this.Request.Scheme + "://" + this.Request.Host;
+
+                DateTime expirationTime = DateTime.Now.AddMinutes(180);
+
+                JwtSecurityToken token = new JwtSecurityToken(
+                    issuer: issuer,
+                    audience: null,
+                    claims: authClaims,
+                    expires: expirationTime,
+                    signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256Signature)
+                );
+
+                string tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+                return Ok(new { Token = tokenString });
             }
 
             return NotFound(new { Error = "L'utilisateur est introuvable ou le mot de passe de concorde pas" });
-        }
-
-        public async Task<ActionResult> Logout()
-        {
-            await SignInManager.SignOutAsync();
-            return Ok();
         }
     }
 }
