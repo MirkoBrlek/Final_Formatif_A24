@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<BackgroundServiceContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'BackgroundServiceContext' not found.")));
 
-// Permet d'obtenir des erreurs de BD plus claires et même d'appliquer des migrations manquantes
+// Permet d'obtenir des erreurs de BD plus claires et mÃªme d'appliquer des migrations manquantes
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>()
@@ -68,7 +68,7 @@ if (urls != null)
                 // If the request is for our hub...
                 var path = context.HttpContext.Request.Path;
                 if (!string.IsNullOrEmpty(accessToken) &&
-                    (path.StartsWithSegments("/chat")))
+                    (path.StartsWithSegments("/game")))
                 {
                     // Read the token out of the query string
                     context.Token = accessToken;
