@@ -45,4 +45,17 @@ public class MathQuestionsHub : Hub
     {
         _matchBackgroundService.SelectChoice(Context.UserIdentifier!, answerIndex);
     }
+
+    public async void UpdateNbBonnesReponses(List<string> playerIDs)
+    {
+        foreach (var id in playerIDs)
+        {
+            var player = await _backgroundServiceContext.Player.FindAsync(id);
+            if (player != null)
+            {
+                player.NbRightAnswers++;
+                await _backgroundServiceContext.SaveChangesAsync();
+            }
+        }
+    }
 }

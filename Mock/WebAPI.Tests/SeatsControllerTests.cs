@@ -1,14 +1,12 @@
-﻿using Microsoft.AspNetCore.Cors.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace WebAPI.Tests;
-
-[TestClass]
-public class SeatsControllerTests
+namespace WebAPI.Tests
 {
-    [TestMethod]
-    public void ReserveSeat()
+    internal class SeatsControllerTests
     {
-        
     }
 }

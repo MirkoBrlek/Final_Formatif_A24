@@ -21,15 +21,16 @@ public class MathBackgroundService : BackgroundService
     private IHubContext<MathQuestionsHub> _mathQuestionHub;
 
     private MathQuestion? _currentQuestion;
-
+    private readonly IServiceScopeFactory _scopeFactory;
     public MathQuestion? CurrentQuestion => _currentQuestion;
 
     private MathQuestionsService _mathQuestionsService;
 
-    public MathBackgroundService(IHubContext<MathQuestionsHub> mathQuestionHub, MathQuestionsService mathQuestionsService)
+    public MathBackgroundService(IHubContext<MathQuestionsHub> mathQuestionHub, MathQuestionsService mathQuestionsService, IServiceScopeFactory serviceScopeFactory)
     {
         _mathQuestionHub = mathQuestionHub;
         _mathQuestionsService = mathQuestionsService;
+        _scopeFactory = serviceScopeFactory;
     }
 
     public void AddUser(string userId)
@@ -66,29 +67,49 @@ public class MathBackgroundService : BackgroundService
         _currentQuestion.PlayerChoices[choice]++;
 
         // TODO: Notifier les clients qu'un joueur a choisi une réponse
+        await _mathQuestionHub.Clients.All.SendAsync("IncreasePlayersChoices",choice);
     }
 
     private async Task EvaluateChoices()
     {
         // TODO: La méthode va avoir besoin d'un scope
-        foreach (var userId in _data.Keys)
+        using (var scope = _scopeFactory.CreateScope())
         {
-            var userData = _data[userId];
+            var context = scope.ServiceProvider.GetRequiredService<BackgroundServiceContext>();
+
+            var rightPlayers = new List<string>();
+
             // TODO: Notifier les clients pour les bonnes et mauvaises réponses
-            // TODO: Modifier et sauvegarder le NbRightAnswers des joueurs qui ont la bonne réponse
-            if (userData.Choice == _currentQuestion!.RightAnswerIndex)
+            await _mathQuestionHub.Clients.All.SendAsync("Answer", _currentQuestion!.RightAnswerIndex, _currentQuestion.Answers[_currentQuestion.RightAnswerIndex]);
+            foreach (var userId in _data.Keys)
             {
+                var userData = _data[userId];                
+                
+                // TODO: Modifier et sauvegarder le NbRightAnswers des joueurs qui ont la bonne réponse
+                if (userData.Choice == _currentQuestion!.RightAnswerIndex)
+                {
+                    rightPlayers.Add(userId);
+                }
+                else
+                {
+                }
 
             }
-            else
+            foreach (var id in rightPlayers)
             {
+                var player = context.Player.Where(p=>p.UserId == id).First();
+                if (player != null)
+                {
+                    player.NbRightAnswers++;
+                }
             }
 
-        }
-        // Reset
-        foreach (var key in _data.Keys)
-        {
-            _data[key].Choice = -1;
+            await context.SaveChangesAsync();
+            // Reset
+            foreach (var key in _data.Keys)
+            {
+                _data[key].Choice = -1;
+            }
         }
     }
 
